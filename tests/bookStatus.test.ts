@@ -14,7 +14,7 @@ describe("showAllBooksStatus", () => {
             status: jest.fn().mockReturnThis(),
             send: jest.fn(),
         };
-    })
+    });
 
     afterEach(() => {
         jest.clearAllMocks();
@@ -23,7 +23,7 @@ describe("showAllBooksStatus", () => {
     it("should return all books with status 'Available'", async () => {
         // Arrange: Mock the BookInstance model's find and populate methods
         const mockFind = jest.fn().mockReturnValue({
-            populate: jest.fn().mockResolvedValue(mockBookInstances)
+            populate: jest.fn().mockResolvedValue(mockBookInstances),
         });
         BookInstance.find = mockFind;
 
@@ -32,7 +32,7 @@ describe("showAllBooksStatus", () => {
 
         // Assert: Check if the response is as expected
         expect(mockFind).toHaveBeenCalledWith({ status: { $eq: "Available" } });
-        expect(BookInstance.find().populate).toHaveBeenCalledWith('book');
+        expect(BookInstance.find().populate).toHaveBeenCalledWith("book");
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith([
             "Mock Book Title : Available",
@@ -43,7 +43,7 @@ describe("showAllBooksStatus", () => {
     it("should return empty list if no books are available", async () => {
         // Arrange: Mock the BookInstance model's find and populate methods
         const mockFind = jest.fn().mockReturnValue({
-            populate: jest.fn().mockResolvedValue([])
+            populate: jest.fn().mockResolvedValue([]),
         });
         BookInstance.find = mockFind;
 
@@ -52,8 +52,18 @@ describe("showAllBooksStatus", () => {
 
         // Assert: Check if the response is as expected
         expect(mockFind).toHaveBeenCalledWith({ status: { $eq: "Available" } });
-        expect(BookInstance.find().populate).toHaveBeenCalledWith('book');
+        expect(BookInstance.find().populate).toHaveBeenCalledWith("book");
         expect(res.status).toHaveBeenCalledWith(200);
         expect(res.send).toHaveBeenCalledWith([]);
+    });
+
+    it("should return 500 if there is an error finding the book instances", async () => {
+        BookInstance.find = jest.fn().mockImplementation(() => {
+            throw new Error("Database error");
+        });
+        await showAllBooksStatus(res as Response);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.send).toHaveBeenCalledWith("Status not found");
     });
 });

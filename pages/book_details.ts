@@ -26,6 +26,9 @@ export const showBookDtls = async (res: Response, id: string): Promise<void> => 
       getBook(id),
       getBookDtl(id)
     ]);
+
+    console.log("book", book);
+    console.log("copies", copies);
     
     if (!book) {
       res.status(404).send(`Book ${id} not found`);
